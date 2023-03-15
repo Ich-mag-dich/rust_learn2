@@ -55,8 +55,11 @@
 // }
 
 fn main() {
-    for number in (1..=10).rev() {
-        println!("{number}");
-    }
+    (1..=10)
+        .rev()
+        .into_iter()
+        .for_each(|number| {
+            println!("{number}");
+        });
     println!("end");
 }
