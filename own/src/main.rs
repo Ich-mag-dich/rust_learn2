@@ -1,10 +1,17 @@
 fn main() {
-    let s = "Hello";
+    let mut s = "Hello";
 
-    println!("{s}");
+    println!("{s}"); // hello
     {
-        let s = "scope";
-        println!("{s}");
+        println!("{s}"); //hello
+        s = "world";
+        println!("{s}"); // world
+        let mut s = "scope";
+        println!("{s}"); // scope
+        s = "here";
+        println!("{s}"); // here
     }
-    println!("{s}");
+    println!("{s}"); // world
 }
+
+// TODO  4.1 부터
