@@ -58,8 +58,6 @@ fn main() {
     (1..=10)
         .rev()
         .into_iter()
-        .for_each(|number| {
-            println!("{number}");
-        });
+        .for_each(|number| println!("{number}"));
     println!("end");
 }
