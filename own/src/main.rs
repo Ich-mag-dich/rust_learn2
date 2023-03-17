@@ -64,8 +64,8 @@ fn slice_word(s: &str, number: i32) -> &str {
             _spec_index2 = i;
             if count == number {
                 return &s[_spec_index.._spec_index2].trim();
-            };
-        };
+            }
+        }
     }
     return &s[_spec_index2 + 1..s.len()].trim();
 }
