@@ -1,5 +1,5 @@
-use std::fs::{ self, File };
-use std::io::{ self, Read };
+use std::fs;
+use std::io;
 
 fn main() {
     // panic!("crash and burn.");
