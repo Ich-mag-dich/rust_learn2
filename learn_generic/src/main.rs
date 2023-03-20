@@ -1,3 +1,21 @@
 fn main() {
-    println!("Hello, world!");
+    let number_list = vec![34, 50, 25, 100, 65];
+
+    let result = largest(&number_list);
+    println!("The largest number is {}", result);
+
+    let number_list = vec![102, 34, 6000, 89, 54, 2, 43, 8];
+
+    let result = largest(&number_list);
+    println!("The largest number is {}", result);
+}
+
+fn largest<T>(list: &[T]) -> &T {
+    let mut largest_num = &list[0];
+    for number in list {
+        if number > largest_num {
+            largest_num = number;
+        }
+    }
+    largest_num
 }
