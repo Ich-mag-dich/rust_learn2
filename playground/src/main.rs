@@ -1,16 +1,9 @@
-mod my_function;
-use std::{ fs, io };
+mod my_functions;
 
-pub use my_function::my_print;
+pub use my_functions::my_function;
 fn main() {
-    my_print::my_print("qweqwe");
-    let s = read_file(&String::from("hello.txt"));
-    match s {
-        Ok(str) => println!("{str}"),
-        Err(e) => panic!("{}", e),
-    }
-}
-
-fn read_file(s: &String) -> Result<String, io::Error> {
-    fs::read_to_string(&s)
+    my_function::my_print("qweqwe");
+    let file_name = String::from("hello.txt");
+    let contents = my_function::text_read(&file_name).expect("can't read file");
+    println!("contents:\n{}", contents);
 }
