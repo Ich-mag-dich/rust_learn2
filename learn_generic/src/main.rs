@@ -10,7 +10,7 @@ fn main() {
     println!("The largest number is {}", result);
 }
 
-fn largest<T>(list: &[T]) -> &T {
+fn largest<'a, T: std::cmp::PartialOrd>(list: &'a [T]) -> &'a T {
     let mut largest_num = &list[0];
     for number in list {
         if number > largest_num {
