@@ -1,3 +1,5 @@
+use std::cmp::PartialOrd;
+
 fn main() {
     let number_list = vec![34, 50, 25, 100, 65];
 
@@ -10,7 +12,10 @@ fn main() {
     println!("The largest number is {}", result);
 }
 
-fn largest<'a, T: std::cmp::PartialOrd>(list: &'a [T]) -> &'a T {
+fn largest<'a, T>(list: &'a [T]) -> &'a T
+where
+    T: PartialOrd,
+{
     let mut largest_num = &list[0];
     for number in list {
         if number > largest_num {
