@@ -15,7 +15,7 @@ pub fn run(mut config: Config) -> Result<(), Box<dyn Error>> {
 }
 
 pub fn read_file(config: &Config) {
-    let contents = read_to_string(&config.file_path).unwrap();
+    let contents = read_to_string(&config.file_path).expect("unable to read file");
     let results = if config.ignore_case {
         search_case_insensitive(&config.query, &contents)
     } else {
@@ -29,7 +29,16 @@ pub fn read_dir(config: &mut Config) {
     for i in files {
         let file = i.unwrap().path();
         if file.is_file() {
-            let contents = String::from(read_to_string(&file).unwrap());
+            let contents = match read_to_string(&file) {
+                Ok(c) => c,
+                Err(_) => {
+                    // eprintln!("Error reading file: {} - {:?}", e, file);
+                    continue;
+                }
+            };
+            if file.to_str().unwrap().contains(".git") {
+                continue;
+            }
             let results = if config.ignore_case {
                 search_case_insensitive(&config.query, &contents)
             } else {
