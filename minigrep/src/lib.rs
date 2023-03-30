@@ -40,6 +40,7 @@ pub fn read_dirs(config: &mut Config) {
         "build",
         ".iml",
         ".xcodeproj",
+        "/pnpm/",
     ];
     let files = fs::read_dir(&config.file_path).unwrap();
 
