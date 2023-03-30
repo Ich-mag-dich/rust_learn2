@@ -1,27 +1,34 @@
 use std::{
     error::Error,
     fs::{self, read_to_string},
+    path::PathBuf,
 };
 
 pub fn run(mut config: Config) -> Result<(), Box<dyn Error>> {
-    // if !PathBuf::from(&config.file_path).is_dir() {
-    //     read_file(&config)
-    // } else {
-    //     read_dirs(&mut config);
-    // }
-    read_dirs(&mut config);
+    if !PathBuf::from(&config.file_path).is_dir() {
+        read_file(&config)
+    } else {
+        read_dirs(&mut config);
+    }
     Ok(())
 }
 
-// pub fn read_file(config: &Config) {
-//     let contents = read_to_string(&config.file_path).expect("unable to read file");
-//     let results = if config.ignore_case {
-//         search_case_insensitive(&config.query, &contents)
-//     } else {
-//         search(&config.query, &contents)
-//     };
-//     print_fn(&config.file_path, results, &config);
-// }
+pub fn read_file(config: &Config) {
+    let contents = read_to_string(&config.file_path);
+    let contents = match contents {
+        Ok(c) => c,
+        Err(_) => {
+            // eprintln!("Error reading file: {} - {:?}", e, file);
+            return;
+        }
+    };
+    let results = if config.ignore_case {
+        search_case_insensitive(&config.query, &contents)
+    } else {
+        search(&config.query, &contents)
+    };
+    print_fn(&config.file_path, results, &config);
+}
 
 pub fn read_dirs(config: &mut Config) {
     // println!("Reading directory: {}", config.file_path);
@@ -41,8 +48,8 @@ pub fn read_dirs(config: &mut Config) {
 
     // let files = files.collect::<Result<Vec<_>, _>>().unwrap();
     // println!("{:?}", files);
-    'outer: for i in files.collect::<Vec<_>>().iter().rev() {
-        let file = i.as_ref().unwrap().path();
+    'outer: for i in files {
+        let file = i.unwrap().path();
         for b in grep_blacklist.iter() {
             if file
                 .to_str()
@@ -97,7 +104,7 @@ pub fn read_dirs(config: &mut Config) {
 
 pub fn print_fn<'a>(filename: &String, results: (Vec<&'a str>, Vec<i32>), config: &Config) {
     let mut count = 0;
-    println!("\n\n\x1b[1m\x1b[35m {filename} \x1b0");
+    println!("\n\x1b[1m\x1b[35m {filename} \x1b0");
     let conq = &config.query;
     let conq2 = format!("\x1b[31m{}\x1b[0m", conq);
     for line in results.0 {
