@@ -3,7 +3,6 @@ use std::{
     fs::{self, read_to_string},
     path::PathBuf,
 };
-
 pub fn run(mut config: Config) -> Result<(), Box<dyn Error>> {
     if !PathBuf::from(&config.file_path).is_dir() {
         read_file(&config)
