@@ -121,16 +121,13 @@ pub struct Config {
 
 impl Config {
     pub fn build(args: &[String]) -> Result<Config, &'static str> {
+        let file_path;
         if args.len() < 3 {
-            return Err("Not enough arguments");
-        }
-
-        let query = args[1].clone();
-        let file_path = if args[2].is_empty() {
-            ".".to_string()
+            file_path = ".".to_string();
         } else {
-            args[2].clone()
-        };
+            file_path = args[2].clone();
+        }
+        let query = args[1].clone();
         let ignore_case = std::env::var("IGNORE_CASE").is_ok();
         Ok(Config {
             query,
