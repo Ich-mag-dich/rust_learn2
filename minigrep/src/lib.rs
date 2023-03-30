@@ -1,34 +1,63 @@
 use std::{
     error::Error,
     fs::{self, read_to_string},
-    path::PathBuf,
 };
 
 pub fn run(mut config: Config) -> Result<(), Box<dyn Error>> {
-    if !PathBuf::from(&config.file_path).is_dir() {
-        read_file(&config)
-    } else {
-        read_dir(&mut config);
-    }
-
+    // if !PathBuf::from(&config.file_path).is_dir() {
+    //     read_file(&config)
+    // } else {
+    //     read_dirs(&mut config);
+    // }
+    read_dirs(&mut config);
     Ok(())
 }
 
-pub fn read_file(config: &Config) {
-    let contents = read_to_string(&config.file_path).expect("unable to read file");
-    let results = if config.ignore_case {
-        search_case_insensitive(&config.query, &contents)
-    } else {
-        search(&config.query, &contents)
-    };
-    print_fn(&config.file_path, results, &config);
-}
+// pub fn read_file(config: &Config) {
+//     let contents = read_to_string(&config.file_path).expect("unable to read file");
+//     let results = if config.ignore_case {
+//         search_case_insensitive(&config.query, &contents)
+//     } else {
+//         search(&config.query, &contents)
+//     };
+//     print_fn(&config.file_path, results, &config);
+// }
 
-pub fn read_dir(config: &mut Config) {
+pub fn read_dirs(config: &mut Config) {
+    // println!("Reading directory: {}", config.file_path);
+    let grep_blacklist = vec![
+        "/target",
+        "/.git",
+        "/.vscode",
+        "/.idea",
+        "node_modules",
+        "CMakeFiles",
+        "build",
+        ".iml",
+        ".xcodeproj",
+    ];
+    // let mut count = 0;
     let files = fs::read_dir(&config.file_path).unwrap();
-    for i in files {
-        let file = i.unwrap().path();
+
+    // let files = files.collect::<Result<Vec<_>, _>>().unwrap();
+    // println!("{:?}", files);
+    'outer: for i in files.collect::<Vec<_>>().iter().rev() {
+        let file = i.as_ref().unwrap().path();
+        for b in grep_blacklist.iter() {
+            if file
+                .to_str()
+                .unwrap()
+                .to_lowercase()
+                .contains(&b.to_lowercase())
+            {
+                continue 'outer;
+            }
+        }
+        // println!("{:?}", file);
         if file.is_file() {
+            // if count > 3 {
+            //     break;
+            // }
             let contents = match read_to_string(&file) {
                 Ok(c) => c,
                 Err(_) => {
@@ -36,9 +65,6 @@ pub fn read_dir(config: &mut Config) {
                     continue;
                 }
             };
-            if file.to_str().unwrap().contains(".git") {
-                continue;
-            }
             let results = if config.ignore_case {
                 search_case_insensitive(&config.query, &contents)
             } else {
@@ -48,24 +74,34 @@ pub fn read_dir(config: &mut Config) {
                 print_fn(&file.to_str().unwrap().to_string(), results, &config);
             }
         } else {
-            config.file_path = file.to_str().unwrap().to_string();
-            read_dir(config);
+            // let mut new_config = config.clone();
+            // count += 1;
+            let file2 = &file.clone();
+            let custom_args = vec![
+                "minigrep".to_string(),
+                config.query.clone(),
+                file2.to_str().unwrap().to_string(),
+            ];
+            let config2 = Config::build(&custom_args).unwrap_or_else(|err| {
+                eprintln!("Problem parsing arguments: {}", err);
+                std::process::exit(1);
+            });
+            // config.file_path = file.to_str().unwrap().to_string();
+            if let Err(e) = run(config2) {
+                eprintln!("Application error: {e}");
+                std::process::exit(1);
+            }
         }
     }
 }
 
-// pub fn read_files(config: &Config) {}
-
 pub fn print_fn<'a>(filename: &String, results: (Vec<&'a str>, Vec<i32>), config: &Config) {
     let mut count = 0;
-    println!("\n\n\x1b[1m\x1b[35m{filename}\x1b0m");
+    println!("\n\n\x1b[1m\x1b[35m {filename} \x1b0");
     let conq = &config.query;
     let conq2 = format!("\x1b[31m{}\x1b[0m", conq);
     for line in results.0 {
-        // let color = line.replace("{&config.query}", "")
         let line1 = line.to_string().replace(conq, conq2.as_str());
-        // println!("{line1}");
-
         println!("\x1b[32m{}\x1b[0m: {}", results.1[count], line1);
         count += 1;
     }
