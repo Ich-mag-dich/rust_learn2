@@ -30,7 +30,6 @@ pub fn read_file(config: &Config) {
 }
 
 pub fn read_dirs(config: &mut Config) {
-    // println!("Reading directory: {}", config.file_path);
     let grep_blacklist = vec![
         "/target",
         "/.git",
@@ -42,11 +41,8 @@ pub fn read_dirs(config: &mut Config) {
         ".iml",
         ".xcodeproj",
     ];
-    // let mut count = 0;
     let files = fs::read_dir(&config.file_path).unwrap();
 
-    // let files = files.collect::<Result<Vec<_>, _>>().unwrap();
-    // println!("{:?}", files);
     'outer: for i in files {
         let file = i.unwrap().path();
         for b in grep_blacklist.iter() {
@@ -59,11 +55,7 @@ pub fn read_dirs(config: &mut Config) {
                 continue 'outer;
             }
         }
-        // println!("{:?}", file);
         if file.is_file() {
-            // if count > 3 {
-            //     break;
-            // }
             let contents = match read_to_string(&file) {
                 Ok(c) => c,
                 Err(_) => {
@@ -80,8 +72,6 @@ pub fn read_dirs(config: &mut Config) {
                 print_fn(&file.to_str().unwrap().to_string(), results, &config);
             }
         } else {
-            // let mut new_config = config.clone();
-            // count += 1;
             let file2 = &file.clone();
             let custom_args = vec![
                 "minigrep".to_string(),
@@ -92,7 +82,6 @@ pub fn read_dirs(config: &mut Config) {
                 eprintln!("Problem parsing arguments: {}", err);
                 std::process::exit(1);
             });
-            // config.file_path = file.to_str().unwrap().to_string();
             if let Err(e) = run(config2) {
                 eprintln!("Application error: {e}");
                 std::process::exit(1);
@@ -142,7 +131,6 @@ pub fn search<'a>(query: &str, contents: &'a str) -> (Vec<&'a str>, Vec<i32>) {
     let mut results_count = Vec::new();
     let mut count = 1;
     for line in contents.lines() {
-        // println!("{count} {line}");
         if line.contains(query) {
             results.push(line);
             results_count.push(count);
