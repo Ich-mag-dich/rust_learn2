@@ -131,6 +131,12 @@ pub fn search<'a>(query: &str, contents: &'a str) -> (Vec<&'a str>, Vec<i32>) {
     let mut results = Vec::new();
     let mut results_count = Vec::new();
     let mut count = 1;
+    // let test1: Vec<_> = contents
+    //     .lines()
+    //     .into_iter()
+    //     .filter(|x| x.contains(query))
+    //     .collect();
+    // println!("{:?}", test1);
     for line in contents.lines() {
         if line.contains(query) {
             results.push(line);
