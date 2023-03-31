@@ -135,14 +135,12 @@ pub fn search<'a>(query: &str, contents: &'a str) -> (Vec<&'a str>, Vec<i32>) {
         Vec::from(
             contents
                 .lines()
-                .into_iter()
                 .filter(|x| x.contains(query))
                 .collect::<Vec<_>>(),
         ),
         Vec::from(
             contents
                 .lines()
-                .into_iter()
                 .enumerate()
                 .filter(|(_, x)| x.contains(query))
                 .map(|(i, _)| i as i32 + 1)
@@ -155,14 +153,12 @@ pub fn search_case_insensitive<'a>(query: &str, contents: &'a str) -> (Vec<&'a s
         Vec::from(
             contents
                 .lines()
-                .into_iter()
                 .filter(|x| x.to_lowercase().contains(&query.to_lowercase()))
                 .collect::<Vec<_>>(),
         ),
         Vec::from(
             contents
                 .lines()
-                .into_iter()
                 .enumerate()
                 .filter(|(_, x)| x.to_lowercase().contains(&query.to_lowercase()))
                 .map(|(i, _)| i as i32 + 1)
