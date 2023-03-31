@@ -79,7 +79,7 @@ pub fn read_dirs(config: &mut Config) {
                 config.query.clone(),
                 file2.to_str().unwrap().to_string(),
             ];
-            let config2 = Config::build(&custom_args).unwrap_or_else(|err| {
+            let config2 = Config::build(custom_args.into_iter()).unwrap_or_else(|err| {
                 eprintln!("Problem parsing arguments: {}", err);
                 std::process::exit(1);
             });
@@ -110,14 +110,17 @@ pub struct Config {
 }
 
 impl Config {
-    pub fn build(args: &[String]) -> Result<Config, &'static str> {
-        let file_path;
-        if args.len() < 3 {
-            file_path = ".".to_string();
-        } else {
-            file_path = args[2].clone();
-        }
-        let query = args[1].clone();
+    pub fn build(mut args: impl Iterator<Item = String>) -> Result<Config, &'static str> {
+        args.next();
+        let query = match args.next() {
+            Some(arg) => arg,
+            None => return Err("Didn't get a query string."),
+        };
+
+        let file_path = match args.next() {
+            Some(arg) => arg,
+            None => String::from("."),
+        };
         let ignore_case = std::env::var("IGNORE_CASE").is_ok();
         Ok(Config {
             query,
@@ -128,37 +131,44 @@ impl Config {
 }
 
 pub fn search<'a>(query: &str, contents: &'a str) -> (Vec<&'a str>, Vec<i32>) {
-    let mut results = Vec::new();
-    let mut results_count = Vec::new();
-    let mut count = 1;
-    // let test1: Vec<_> = contents
-    //     .lines()
-    //     .into_iter()
-    //     .filter(|x| x.contains(query))
-    //     .collect();
-    // println!("{:?}", test1);
-    for line in contents.lines() {
-        if line.contains(query) {
-            results.push(line);
-            results_count.push(count);
-        }
-        count += 1;
-    }
-    (results, results_count)
+    (
+        Vec::from(
+            contents
+                .lines()
+                .into_iter()
+                .filter(|x| x.contains(query))
+                .collect::<Vec<_>>(),
+        ),
+        Vec::from(
+            contents
+                .lines()
+                .into_iter()
+                .enumerate()
+                .filter(|(_, x)| x.contains(query))
+                .map(|(i, _)| i as i32 + 1)
+                .collect::<Vec<_>>(),
+        ),
+    )
 }
 pub fn search_case_insensitive<'a>(query: &str, contents: &'a str) -> (Vec<&'a str>, Vec<i32>) {
-    let query = query.to_lowercase();
-    let mut count = 1;
-    let mut results = Vec::new();
-    let mut results_count = Vec::new();
-    for line in contents.lines() {
-        if line.to_lowercase().contains(&query) {
-            results.push(line);
-            results_count.push(count);
-        }
-        count += 1;
-    }
-    (results, results_count)
+    (
+        Vec::from(
+            contents
+                .lines()
+                .into_iter()
+                .filter(|x| x.to_lowercase().contains(&query.to_lowercase()))
+                .collect::<Vec<_>>(),
+        ),
+        Vec::from(
+            contents
+                .lines()
+                .into_iter()
+                .enumerate()
+                .filter(|(_, x)| x.to_lowercase().contains(&query.to_lowercase()))
+                .map(|(i, _)| i as i32 + 1)
+                .collect::<Vec<_>>(),
+        ),
+    )
 }
 
 // #[cfg(test)]
